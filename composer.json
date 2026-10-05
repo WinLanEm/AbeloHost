@@ -1,0 +1,21 @@
+{
+    "name": "app/php-blog-test-assignment",
+    "description": "A framework-free PHP blog created as a test assignment.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": "^8.5",
+        "ext-pdo": "*",
+        "ext-pdo_mysql": "*",
+        "smarty/smarty": "^5.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    }
+}

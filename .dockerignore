@@ -1,0 +1,9 @@
+.env*
+.git
+.idea
+.specs
+.vscode
+coverage
+vendor
+var
+docs
