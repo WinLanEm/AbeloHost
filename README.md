@@ -26,3 +26,25 @@ docker compose up -d
 ```bash
 docker compose down
 ```
+
+## Проверка качества
+
+Все проверки запускаются в PHP-контейнере:
+
+```bash
+docker compose run --rm --no-deps php composer quality
+```
+
+Отдельные проверки:
+
+```bash
+docker compose run --rm --no-deps php composer cs-check
+docker compose run --rm --no-deps php composer stan
+docker compose run --rm --no-deps php composer test
+```
+
+Автоматическое исправление стиля:
+
+```bash
+docker compose run --rm --no-deps php composer cs-fix
+```

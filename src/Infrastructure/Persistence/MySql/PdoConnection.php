@@ -16,8 +16,7 @@ final class PdoConnection
         private readonly string $database,
         private readonly string $username,
         private readonly string $password,
-    ) {
-    }
+    ) {}
 
     public function getConnection(): PDO
     {

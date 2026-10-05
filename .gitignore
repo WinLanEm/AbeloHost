@@ -2,7 +2,6 @@
 !/.env.example
 /.idea/
 /.vscode/
-/.phpunit.cache/
 /coverage/
 /vendor/
 /var/

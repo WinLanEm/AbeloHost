@@ -14,8 +14,28 @@
             "App\\": "src/"
         }
     },
+    "scripts": {
+        "test": "phpunit",
+        "stan": "phpstan analyse --no-progress",
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "composer-validate": "composer validate --strict",
+        "security-audit": "composer audit",
+        "quality": [
+            "@composer-validate",
+            "@cs-check",
+            "@stan",
+            "@test",
+            "@security-audit"
+        ]
+    },
     "config": {
         "optimize-autoloader": true,
         "sort-packages": true
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpstan/phpstan": "^2.2",
+        "phpunit/phpunit": "^13.4"
     }
 }
