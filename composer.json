@@ -16,6 +16,7 @@
     },
     "scripts": {
         "db:migrate": "php bin/migrate.php",
+        "db:seed": "php bin/seed.php",
         "test": "phpunit",
         "stan": "phpstan analyse --no-progress",
         "cs-check": "php-cs-fixer fix --dry-run --diff",

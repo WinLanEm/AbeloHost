@@ -18,6 +18,7 @@ docker compose build
 docker compose run --rm --no-deps php composer install
 docker compose up -d
 docker compose exec php composer db:migrate
+docker compose exec php composer db:seed
 ```
 
 Приложение будет доступно по адресу <http://localhost:8080>.
@@ -26,6 +27,14 @@ docker compose exec php composer db:migrate
 
 ```bash
 docker compose down
+```
+
+## Тестовые данные
+
+Повторный запуск сидинга полностью заменяет категории, статьи и связи между ними:
+
+```bash
+docker compose exec php composer db:seed
 ```
 
 ## Проверка качества
