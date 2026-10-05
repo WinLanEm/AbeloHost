@@ -17,6 +17,7 @@ cp .env.example .env
 docker compose build
 docker compose run --rm --no-deps php composer install
 docker compose up -d
+docker compose exec php composer db:migrate
 ```
 
 Приложение будет доступно по адресу <http://localhost:8080>.

@@ -15,6 +15,7 @@
         }
     },
     "scripts": {
+        "db:migrate": "php bin/migrate.php",
         "test": "phpunit",
         "stan": "phpstan analyse --no-progress",
         "cs-check": "php-cs-fixer fix --dry-run --diff",
