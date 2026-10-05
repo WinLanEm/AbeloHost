@@ -3,7 +3,9 @@
 declare(strict_types=1);
 
 use App\Infrastructure\View\SmartyRenderer;
+use App\Presentation\Controller\ArticleController;
 use App\Presentation\Controller\HomeController;
+use App\Presentation\Http\Router;
 
 $autoloadPath = __DIR__ . '/vendor/autoload.php';
 
@@ -18,4 +20,8 @@ $renderer = new SmartyRenderer(
     compileDirectory: __DIR__ . '/var/cache/smarty/templates_c',
 );
 
-return new HomeController($renderer);
+$router = new Router();
+$router->get('/', new HomeController($renderer));
+$router->get('/articles/{id}', new ArticleController($renderer));
+
+return $router;

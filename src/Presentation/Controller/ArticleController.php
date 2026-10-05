@@ -7,8 +7,9 @@ namespace App\Presentation\Controller;
 use App\Application\View\ViewRenderer;
 use App\Presentation\Http\Request;
 use App\Presentation\Http\Response;
+use LogicException;
 
-final readonly class HomeController
+final readonly class ArticleController
 {
     public function __construct(private ViewRenderer $renderer) {}
 
@@ -17,8 +18,12 @@ final readonly class HomeController
      */
     public function __invoke(Request $request, array $routeParameters): Response
     {
-        return Response::html($this->renderer->render('home.tpl', [
-            'pageTitle' => 'PHP Blog',
+        $articleId = $routeParameters['id'] ?? throw new LogicException('Article route requires an id.');
+
+        return Response::html($this->renderer->render('article.tpl', [
+            'pageTitle' => sprintf('Статья #%s', $articleId),
+            'articleId' => $articleId,
+            'articlePath' => $request->path(),
         ]));
     }
 }

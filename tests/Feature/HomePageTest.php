@@ -15,7 +15,7 @@ final class HomePageTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $_SERVER['REQUEST_URI'] = '/';
 
-        http_response_code(200);
+        http_response_code(500);
         ob_start();
 
         require dirname(__DIR__, 2) . '/public/index.php';

@@ -6,6 +6,7 @@ namespace Tests\Unit\Presentation\Controller;
 
 use App\Application\View\ViewRenderer;
 use App\Presentation\Controller\HomeController;
+use App\Presentation\Http\Request;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +23,10 @@ final class HomeControllerTest extends TestCase
             ->willReturn('<h1>PHP Blog</h1>');
 
         $controller = new HomeController($renderer);
+        $response = $controller(new Request('GET', '/'), []);
 
-        self::assertSame('<h1>PHP Blog</h1>', $controller());
+        self::assertSame(200, $response->statusCode());
+        self::assertSame('<h1>PHP Blog</h1>', $response->body());
+        self::assertSame('text/html; charset=UTF-8', $response->headers()['Content-Type']);
     }
 }
