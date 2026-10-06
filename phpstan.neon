@@ -1,9 +1,0 @@
-parameters:
-    level: 7
-    paths:
-        - bootstrap.php
-        - config
-        - public
-        - src
-        - tests
-    tmpDir: var/cache/phpstan

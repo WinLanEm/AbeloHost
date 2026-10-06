@@ -26,7 +26,7 @@ abstract class FeatureTestCase extends DatabaseTestCase
         $this->queryParameters = $_GET;
 
         /** @var \Closure(?\PDO=): HttpApplication $createApplication */
-        $createApplication = require dirname(__DIR__, 2) . '/bootstrap.php';
+        $createApplication = require dirname(__DIR__, 2) . '/bootstrap/application.php';
         $this->application = $createApplication($this->connection);
     }
 

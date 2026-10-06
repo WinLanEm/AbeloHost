@@ -17,7 +17,8 @@ use App\Presentation\Http\HttpApplication;
 use App\Presentation\Http\Router;
 use App\Presentation\View\BlogViewData;
 
-$autoloadPath = __DIR__ . '/vendor/autoload.php';
+$projectDirectory = dirname(__DIR__);
+$autoloadPath = $projectDirectory . '/vendor/autoload.php';
 
 if (!is_file($autoloadPath)) {
     throw new RuntimeException('Composer dependencies are not installed. Run composer install.');
@@ -26,10 +27,10 @@ if (!is_file($autoloadPath)) {
 require_once $autoloadPath;
 
 /** @var \Closure(?\PDO=): HttpApplication $createApplication */
-$createApplication = static function (?\PDO $pdo = null): HttpApplication {
+$createApplication = static function (?\PDO $pdo = null) use ($projectDirectory): HttpApplication {
     if ($pdo === null) {
         /** @var array{host: string, port: int, database: string, username: string, password: string} $databaseConfig */
-        $databaseConfig = require __DIR__ . '/config/database.php';
+        $databaseConfig = require $projectDirectory . '/config/database.php';
 
         $connection = new PdoConnection(
             host: $databaseConfig['host'],
@@ -42,11 +43,11 @@ $createApplication = static function (?\PDO $pdo = null): HttpApplication {
     }
 
     /** @var array{debug: bool} $applicationConfig */
-    $applicationConfig = require __DIR__ . '/config/application.php';
+    $applicationConfig = require $projectDirectory . '/config/application.php';
     /** @var array<class-string<Throwable>, array{statusCode: int, publicMessage: string}> $httpExceptionConfig */
-    $httpExceptionConfig = require __DIR__ . '/config/http_exceptions.php';
+    $httpExceptionConfig = require $projectDirectory . '/config/http_exceptions.php';
     /** @var array{templateDirectory: string, compileDirectory: string} $viewConfig */
-    $viewConfig = require __DIR__ . '/config/view.php';
+    $viewConfig = require $projectDirectory . '/config/view.php';
 
     $articleRepository = new PdoArticleRepository($pdo);
     $categoryRepository = new PdoCategoryRepository($pdo);

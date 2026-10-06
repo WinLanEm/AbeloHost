@@ -22,10 +22,10 @@
     "scripts": {
         "db:migrate": "php bin/migrate.php",
         "db:seed": "php bin/seed.php",
-        "test": "phpunit",
-        "stan": "phpstan analyse --no-progress",
-        "cs-check": "php-cs-fixer fix --dry-run --diff",
-        "cs-fix": "php-cs-fixer fix",
+        "test": "phpunit --configuration .config/phpunit.xml",
+        "stan": "phpstan analyse --configuration=.config/phpstan.neon --no-progress",
+        "cs-check": "php-cs-fixer fix --config=.config/php-cs-fixer.php --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix --config=.config/php-cs-fixer.php",
         "composer-validate": "composer validate --strict",
         "security-audit": "composer audit",
         "quality": [

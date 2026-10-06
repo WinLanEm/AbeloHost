@@ -5,9 +5,10 @@ declare(strict_types=1);
 use PhpCsFixer\Config;
 use PhpCsFixer\Finder;
 
+$projectDirectory = dirname(__DIR__);
 $finder = Finder::create()
     ->files()
-    ->in(__DIR__)
+    ->in($projectDirectory)
     ->exclude([
         'var',
         'vendor',
@@ -15,7 +16,7 @@ $finder = Finder::create()
     ->name('*.php');
 
 return (new Config())
-    ->setCacheFile(__DIR__ . '/var/cache/php-cs-fixer.cache')
+    ->setCacheFile($projectDirectory . '/var/cache/php-cs-fixer.cache')
     ->setRules([
         '@PER-CS2.0' => true,
         'array_syntax' => ['syntax' => 'short'],

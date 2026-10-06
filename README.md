@@ -1,90 +1,164 @@
 # PHP Blog — тестовое задание
 
+Небольшой блог без PHP-фреймворка. На главной странице статьи сгруппированы
+по категориям, страница категории поддерживает сортировку и пагинацию, а
+страница статьи показывает категории, счётчик просмотров и похожие публикации.
+
+## Возможности
+
+- три последние статьи для каждой непустой категории на главной странице;
+- сортировка статей категории по дате и количеству просмотров;
+- пагинация с проверкой номера страницы;
+- увеличение счётчика просмотров статьи;
+- поиск похожих статей по общим категориям;
+- HTML-страницы ошибок и безопасный текстовый fallback для ошибок рендеринга;
+- миграции и детерминированные демонстрационные данные;
+- Unit- и Feature-тесты с отдельной MySQL-базой.
+
 ## Стек
 
-- PHP 8.5, Composer;
+- PHP 8.5, Composer и PDO;
+- MySQL 8.4;
 - Smarty 5;
-- MySQL 8.4, PDO;
-- nginx, PHP-FPM;
-- SCSS, Dart Sass;
+- nginx и PHP-FPM;
+- SCSS и Dart Sass;
+- PHPUnit, PHPStan и PHP CS Fixer;
 - Docker и Docker Compose.
 
-## Запуск
+## Быстрый запуск
 
-Требуются Docker и Docker Compose.
-
-```bash
-cp .env.example .env
-docker compose build
-docker compose run --rm --no-deps php composer install
-docker compose run --rm --no-deps assets npm ci
-docker compose up -d
-docker compose exec php composer db:migrate
-docker compose exec php composer db:seed
-```
-
-Приложение будет доступно по адресу <http://localhost:8080>.
-
-Остановка:
+Требуются Docker, Docker Compose и Make.
 
 ```bash
-docker compose down
+make init
 ```
 
-## Тестовые данные
+Команда автоматически:
 
-Повторный запуск сидинга полностью заменяет категории, статьи и связи между ними:
+1. создаст `.env` из `.env.example`, если файла ещё нет;
+2. соберёт PHP-образ;
+3. установит Composer- и npm-зависимости;
+4. запустит контейнеры;
+5. применит миграции;
+6. загрузит демонстрационные данные.
+
+Существующий `.env` команда не перезаписывает. Повторный `make init` заново
+загружает демонстрационные данные.
+
+После запуска приложение доступно по адресу <http://localhost:8080>.
+Порт можно изменить через `HTTP_PORT` в `.env`.
+
+## Команды
+
+Полный список основных команд можно вывести через:
 
 ```bash
-docker compose exec php composer db:seed
+make help
 ```
 
-## Проверка качества
-
-Все проверки запускаются в PHP-контейнере:
+Управление окружением:
 
 ```bash
-make quality
+make up          # запустить контейнеры
+make stop        # остановить контейнеры
+make down        # остановить и удалить контейнеры
+make restart     # перезапустить окружение
+make status      # показать состояние сервисов
+make logs        # следить за логами
+make shell       # открыть shell в PHP-контейнере
 ```
 
-При запуске тестов команда автоматически создаёт отдельную базу из
-`TEST_DB_NAME`, выдаёт к ней доступ пользователю приложения и применяет
-миграции. Данные основной базы не изменяются.
+База данных:
 
-Запуск тестов:
+```bash
+make migrate     # применить новые миграции
+make seed        # заменить данные демонстрационными
+make db          # выполнить migrate и seed
+```
+
+Проверки:
+
+```bash
+make test        # запустить PHPUnit
+make quality     # запустить все проверки
+make stan        # запустить PHPStan
+make cs-check    # проверить стиль PHP
+make cs-fix      # автоматически исправить стиль PHP
+make audit       # проверить Composer-зависимости
+```
+
+Стили:
+
+```bash
+make css         # разовая сборка SCSS
+make css-watch   # пересборка при изменениях
+```
+
+При обычном `make up` сервис `assets` уже запускает Sass в watch-режиме.
+
+## Конфигурация окружения
+
+Приложение не использует dotenv-библиотеку. Docker Compose автоматически
+читает `.env`, подставляет значения в `docker-compose.yml` и передаёт нужные
+переменные PHP- и MySQL-контейнерам. PHP получает их через `getenv()`.
+
+Основные переменные:
+
+| Переменная | Назначение | Значение по умолчанию |
+| --- | --- | --- |
+| `HTTP_PORT` | Порт приложения на хосте | `8080` |
+| `APP_ENV` | Окружение приложения | `dev` |
+| `DB_NAME` | Основная база данных | `blog` |
+| `TEST_DB_NAME` | База данных PHPUnit | `blog_test` |
+| `DB_USER` | Пользователь приложения | `blog` |
+| `DB_PASSWORD` | Пароль пользователя приложения | задаётся в `.env` |
+| `DB_ROOT_PASSWORD` | Root-пароль только для MySQL-контейнера | задаётся в `.env` |
+
+Root-пароль не передаётся PHP-контейнеру.
+
+## Тесты
 
 ```bash
 make test
 ```
 
-Отдельные проверки:
+Перед запуском тестов Make вызывает команду внутри MySQL-контейнера: она
+создаёт базу из `TEST_DB_NAME` и выдаёт к ней права обычному пользователю
+приложения. PHPUnit переключается на эту базу и применяет миграции.
 
-```bash
-docker compose run --rm --no-deps php composer cs-check
-docker compose run --rm --no-deps php composer stan
+Feature-тесты выполняют настоящий HTTP-сценарий:
+
+```text
+Request → Router → Controller → Application → PDO → MySQL → Smarty → Response
 ```
 
-Автоматическое исправление стиля:
+Каждый тест работает внутри транзакции, которая откатывается после выполнения.
+Основная база и демонстрационные данные не изменяются.
 
-```bash
-docker compose run --rm --no-deps php composer cs-fix
-```
+Unit-тесты отдельно проверяют базовые HTTP-модули: `Request`, `Response`,
+`Router` и `ExceptionHandler`. `SmartyRenderer` проверяется с настоящим Smarty.
 
 ## Стили
 
-Исходные стили находятся в `assets/scss/main.scss`, скомпилированный CSS — в `public/assets/css/main.css`.
+Исходный SCSS находится в `assets/scss/main.scss`, а скомпилированный файл — в
+`public/assets/css/main.css`. Версия Sass закреплена в `package-lock.json`,
+сборка выполняется в Node-контейнере.
 
-Установка frontend-зависимостей:
+## Структура проекта
 
-```bash
-docker compose run --rm --no-deps assets npm ci
+```text
+bootstrap/      сборка приложения и зависимостей
+config/         конфигурация приложения
+database/       SQL-миграции и демонстрационные данные
+public/         front controller и публичные ресурсы
+src/
+  Domain/       модели и repository contracts
+  Application/  пользовательские сценарии
+  Infrastructure/ PDO, MySQL и Smarty adapters
+  Presentation/ HTTP, контроллеры и подготовка данных для шаблонов
+templates/      Smarty-шаблоны и переиспользуемые partial'ы
+tests/          Unit-, Feature-тесты и тестовая инфраструктура
 ```
 
-Разовая сборка CSS:
-
-```bash
-docker compose run --rm --no-deps assets npm run build:css
-```
-
-При обычном `docker compose up -d` сервис `assets` запускает Sass в watch-режиме
-и пересобирает CSS после изменений `main.scss`.
+Composition root расположен в `bootstrap/application.php`. Domain и
+Application не зависят от PDO, MySQL, Smarty или HTTP-реализации.

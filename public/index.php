@@ -19,7 +19,7 @@ require_once $autoloadPath;
 
 try {
     /** @var Closure(?PDO=): HttpApplication $createApplication */
-    $createApplication = require dirname(__DIR__) . '/bootstrap.php';
+    $createApplication = require dirname(__DIR__) . '/bootstrap/application.php';
     $application = $createApplication();
 
     $application->handle(Request::fromGlobals())->send();
