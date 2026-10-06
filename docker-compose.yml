@@ -30,6 +30,17 @@ services:
       mysql:
         condition: service_healthy
 
+  assets:
+    image: node:22-alpine
+    working_dir: /app
+    user: "${HOST_UID:-1000}:${HOST_GID:-1000}"
+    init: true
+    environment:
+      NPM_CONFIG_CACHE: /tmp/npm-cache
+    command: ["npm", "run", "watch:css"]
+    volumes:
+      - .:/app
+
   mysql:
     image: mysql:8.4
     environment:

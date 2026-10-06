@@ -7,3 +7,4 @@ coverage
 vendor
 var
 docs
+node_modules

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title description">
+    <title id="title">Архитектура</title>
+    <desc id="description">Обложка статьи об архитектуре приложения</desc>
+    <defs>
+        <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7c2d12"/>
+            <stop offset="1" stop-color="#ea580c"/>
+        </linearGradient>
+    </defs>
+    <rect width="1200" height="675" fill="url(#background)"/>
+    <circle cx="1030" cy="620" r="280" fill="#ffffff" opacity="0.07"/>
+    <circle cx="130" cy="100" r="210" fill="#ffffff" opacity="0.05"/>
+    <text x="600" y="365" fill="#ffffff" font-family="sans-serif" font-size="106" font-weight="700" text-anchor="middle">APP</text>
+</svg>

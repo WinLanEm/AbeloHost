@@ -3,6 +3,7 @@
 /.idea/
 /.vscode/
 /coverage/
+/node_modules/
 /vendor/
 /var/
 /docs

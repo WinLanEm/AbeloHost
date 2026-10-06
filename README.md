@@ -6,6 +6,7 @@
 - Smarty 5;
 - MySQL 8.4, PDO;
 - nginx, PHP-FPM;
+- SCSS, Dart Sass;
 - Docker и Docker Compose.
 
 ## Запуск
@@ -16,6 +17,7 @@
 cp .env.example .env
 docker compose build
 docker compose run --rm --no-deps php composer install
+docker compose run --rm --no-deps assets npm ci
 docker compose up -d
 docker compose exec php composer db:migrate
 docker compose exec php composer db:seed
@@ -58,3 +60,22 @@ docker compose run --rm --no-deps php composer test
 ```bash
 docker compose run --rm --no-deps php composer cs-fix
 ```
+
+## Стили
+
+Исходные стили находятся в `assets/scss/main.scss`, скомпилированный CSS — в `public/assets/css/main.css`.
+
+Установка frontend-зависимостей:
+
+```bash
+docker compose run --rm --no-deps assets npm ci
+```
+
+Разовая сборка CSS:
+
+```bash
+docker compose run --rm --no-deps assets npm run build:css
+```
+
+При обычном `docker compose up -d` сервис `assets` запускает Sass в watch-режиме
+и пересобирает CSS после изменений `main.scss`.

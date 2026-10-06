@@ -1,0 +1,11 @@
+{
+  "name": "abelohost-php-blog",
+  "private": true,
+  "scripts": {
+    "build:css": "sass assets/scss/main.scss public/assets/css/main.css --style=compressed --no-source-map",
+    "watch:css": "sass assets/scss/main.scss public/assets/css/main.css --watch"
+  },
+  "devDependencies": {
+    "sass": "^1.93.2"
+  }
+}

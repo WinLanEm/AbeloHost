@@ -24,6 +24,6 @@ final class HomePageTest extends TestCase
 
         self::assertSame(200, http_response_code());
         self::assertIsString($body);
-        self::assertStringContainsString('<h1>PHP Blog</h1>', $body);
+        self::assertStringContainsString('<h1 class="visually-hidden">PHP Blog</h1>', $body);
     }
 }
