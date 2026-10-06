@@ -12,6 +12,8 @@ use App\Infrastructure\View\SmartyRenderer;
 use App\Presentation\Controller\ArticleController;
 use App\Presentation\Controller\CategoryController;
 use App\Presentation\Controller\HomeController;
+use App\Presentation\Http\ExceptionHandler;
+use App\Presentation\Http\HttpApplication;
 use App\Presentation\Http\Router;
 use App\Presentation\View\BlogViewData;
 
@@ -23,49 +25,68 @@ if (!is_file($autoloadPath)) {
 
 require_once $autoloadPath;
 
-/** @var array{host: string, port: int, database: string, username: string, password: string} $databaseConfig */
-$databaseConfig = require __DIR__ . '/config/database.php';
-/** @var array{templateDirectory: string, compileDirectory: string} $viewConfig */
-$viewConfig = require __DIR__ . '/config/view.php';
+/** @var \Closure(?\PDO=): HttpApplication $createApplication */
+$createApplication = static function (?\PDO $pdo = null): HttpApplication {
+    if ($pdo === null) {
+        /** @var array{host: string, port: int, database: string, username: string, password: string} $databaseConfig */
+        $databaseConfig = require __DIR__ . '/config/database.php';
 
-$connection = new PdoConnection(
-    host: $databaseConfig['host'],
-    port: $databaseConfig['port'],
-    database: $databaseConfig['database'],
-    username: $databaseConfig['username'],
-    password: $databaseConfig['password'],
-);
-$pdo = $connection->getConnection();
-$articleRepository = new PdoArticleRepository($pdo);
-$categoryRepository = new PdoCategoryRepository($pdo);
+        $connection = new PdoConnection(
+            host: $databaseConfig['host'],
+            port: $databaseConfig['port'],
+            database: $databaseConfig['database'],
+            username: $databaseConfig['username'],
+            password: $databaseConfig['password'],
+        );
+        $pdo = $connection->getConnection();
+    }
 
-$renderer = new SmartyRenderer(
-    templateDirectory: $viewConfig['templateDirectory'],
-    compileDirectory: $viewConfig['compileDirectory'],
-);
-$viewData = new BlogViewData();
+    /** @var array{debug: bool} $applicationConfig */
+    $applicationConfig = require __DIR__ . '/config/application.php';
+    /** @var array<class-string<Throwable>, array{statusCode: int, publicMessage: string}> $httpExceptionConfig */
+    $httpExceptionConfig = require __DIR__ . '/config/http_exceptions.php';
+    /** @var array{templateDirectory: string, compileDirectory: string} $viewConfig */
+    $viewConfig = require __DIR__ . '/config/view.php';
 
-$router = new Router();
-$router->get('/', new HomeController(
-    getHomePage: new GetHomePage(
-        categories: $categoryRepository,
-        articles: $articleRepository,
-    ),
-    renderer: $renderer,
-    viewData: $viewData,
-));
-$router->get('/categories/{id}', new CategoryController(
-    getCategoryPage: new GetCategoryPage(
-        categories: $categoryRepository,
-        articles: $articleRepository,
-    ),
-    renderer: $renderer,
-    viewData: $viewData,
-));
-$router->get('/articles/{id}', new ArticleController(
-    getArticlePage: new GetArticlePage($articleRepository),
-    renderer: $renderer,
-    viewData: $viewData,
-));
+    $articleRepository = new PdoArticleRepository($pdo);
+    $categoryRepository = new PdoCategoryRepository($pdo);
+    $renderer = new SmartyRenderer(
+        templateDirectory: $viewConfig['templateDirectory'],
+        compileDirectory: $viewConfig['compileDirectory'],
+    );
+    $viewData = new BlogViewData();
 
-return $router;
+    $router = new Router();
+    $router->get('/', new HomeController(
+        getHomePage: new GetHomePage(
+            categories: $categoryRepository,
+            articles: $articleRepository,
+        ),
+        renderer: $renderer,
+        viewData: $viewData,
+    ));
+    $router->get('/categories/{id}', new CategoryController(
+        getCategoryPage: new GetCategoryPage(
+            categories: $categoryRepository,
+            articles: $articleRepository,
+        ),
+        renderer: $renderer,
+        viewData: $viewData,
+    ));
+    $router->get('/articles/{id}', new ArticleController(
+        getArticlePage: new GetArticlePage($articleRepository),
+        renderer: $renderer,
+        viewData: $viewData,
+    ));
+
+    return new HttpApplication(
+        router: $router,
+        exceptionHandler: new ExceptionHandler(
+            renderer: $renderer,
+            debug: $applicationConfig['debug'],
+            exceptionMappings: $httpExceptionConfig,
+        ),
+    );
+};
+
+return $createApplication;

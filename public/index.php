@@ -2,8 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Infrastructure\View\SmartyRenderer;
-use App\Presentation\Http\ExceptionHandler;
+use App\Presentation\Http\HttpApplication;
 use App\Presentation\Http\Request;
 
 $autoloadPath = dirname(__DIR__) . '/vendor/autoload.php';
@@ -19,31 +18,11 @@ if (!is_file($autoloadPath)) {
 require_once $autoloadPath;
 
 try {
-    /** @var array{debug: bool} $applicationConfig */
-    $applicationConfig = require dirname(__DIR__) . '/config/application.php';
-    /** @var array<class-string<Throwable>, array{statusCode: int, publicMessage: string}> $httpExceptionConfig */
-    $httpExceptionConfig = require dirname(__DIR__) . '/config/http_exceptions.php';
-    /** @var array{templateDirectory: string, compileDirectory: string} $viewConfig */
-    $viewConfig = require dirname(__DIR__) . '/config/view.php';
+    /** @var Closure(?PDO=): HttpApplication $createApplication */
+    $createApplication = require dirname(__DIR__) . '/bootstrap.php';
+    $application = $createApplication();
 
-    $exceptionHandler = new ExceptionHandler(
-        renderer: new SmartyRenderer(
-            templateDirectory: $viewConfig['templateDirectory'],
-            compileDirectory: $viewConfig['compileDirectory'],
-        ),
-        debug: $applicationConfig['debug'],
-        exceptionMappings: $httpExceptionConfig,
-    );
-
-    try {
-        $router = require dirname(__DIR__) . '/bootstrap.php';
-
-        $response = $router->dispatch(Request::fromGlobals());
-    } catch (Throwable $exception) {
-        $response = $exceptionHandler->handle($exception);
-    }
-
-    $response->send();
+    $application->handle(Request::fromGlobals())->send();
 } catch (Throwable $exception) {
     error_log((string) $exception);
 
