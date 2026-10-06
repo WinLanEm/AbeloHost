@@ -22,6 +22,7 @@ services:
       DB_HOST: "${DB_HOST:-mysql}"
       DB_PORT: "${DB_PORT:-3306}"
       DB_NAME: "${DB_NAME:-blog}"
+      TEST_DB_NAME: "${TEST_DB_NAME:-blog_test}"
       DB_USER: "${DB_USER:-blog}"
       DB_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in .env}"
     volumes:
@@ -45,11 +46,13 @@ services:
     image: mysql:8.4
     environment:
       MYSQL_DATABASE: "${DB_NAME:-blog}"
+      TEST_DB_NAME: "${TEST_DB_NAME:-blog_test}"
       MYSQL_USER: "${DB_USER:-blog}"
       MYSQL_PASSWORD: "${DB_PASSWORD:?Set DB_PASSWORD in .env}"
       MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./docker/mysql/prepare-test-database.sh:/usr/local/bin/prepare-test-database:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u$$MYSQL_USER -p$$MYSQL_PASSWORD --silent"]
       interval: 5s

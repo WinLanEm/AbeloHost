@@ -44,7 +44,17 @@ docker compose exec php composer db:seed
 Все проверки запускаются в PHP-контейнере:
 
 ```bash
-docker compose run --rm --no-deps php composer quality
+make quality
+```
+
+При запуске тестов команда автоматически создаёт отдельную базу из
+`TEST_DB_NAME`, выдаёт к ней доступ пользователю приложения и применяет
+миграции. Данные основной базы не изменяются.
+
+Запуск тестов:
+
+```bash
+make test
 ```
 
 Отдельные проверки:
@@ -52,7 +62,6 @@ docker compose run --rm --no-deps php composer quality
 ```bash
 docker compose run --rm --no-deps php composer cs-check
 docker compose run --rm --no-deps php composer stan
-docker compose run --rm --no-deps php composer test
 ```
 
 Автоматическое исправление стиля:
