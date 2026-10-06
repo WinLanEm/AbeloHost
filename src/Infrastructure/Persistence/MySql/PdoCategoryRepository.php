@@ -7,6 +7,7 @@ namespace App\Infrastructure\Persistence\MySql;
 use App\Domain\Model\Category;
 use App\Domain\Repository\CategoryRepository;
 use PDO;
+use RuntimeException;
 
 final readonly class PdoCategoryRepository implements CategoryRepository
 {
@@ -28,6 +29,40 @@ final readonly class PdoCategoryRepository implements CategoryRepository
             return null;
         }
 
+        return $this->hydrate($row);
+    }
+
+    public function findWithArticles(): array
+    {
+        $statement = $this->connection->query(<<<'SQL'
+            SELECT category.id, category.name, category.description
+            FROM categories AS category
+            WHERE EXISTS (
+                SELECT 1
+                FROM article_category AS relation
+                WHERE relation.category_id = category.id
+            )
+            ORDER BY category.name, category.id
+            SQL);
+
+        if ($statement === false) {
+            throw new RuntimeException('Could not fetch categories with articles.');
+        }
+
+        $categories = [];
+
+        while (($row = $statement->fetch()) !== false) {
+            $categories[] = $this->hydrate($row);
+        }
+
+        return $categories;
+    }
+
+    /**
+     * @param array<string, mixed> $row
+     */
+    private function hydrate(array $row): Category
+    {
         return new Category(
             id: (int) $row['id'],
             name: (string) $row['name'],

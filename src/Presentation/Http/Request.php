@@ -59,8 +59,21 @@ final readonly class Request
         return $this->path;
     }
 
-    public function query(string $name, mixed $default = null): mixed
+    public function stringQuery(string $name, string $default): string
     {
-        return $this->queryParameters[$name] ?? $default;
+        $value = $this->queryParameters[$name] ?? $default;
+
+        return is_string($value) ? $value : $default;
+    }
+
+    public function positiveIntegerQuery(string $name, int $default): int
+    {
+        $value = filter_var(
+            $this->queryParameters[$name] ?? $default,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]],
+        );
+
+        return $value === false ? $default : $value;
     }
 }

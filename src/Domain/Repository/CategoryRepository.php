@@ -9,4 +9,9 @@ use App\Domain\Model\Category;
 interface CategoryRepository
 {
     public function findById(int $id): ?Category;
+
+    /**
+     * @return list<Category>
+     */
+    public function findWithArticles(): array;
 }
