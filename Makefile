@@ -4,7 +4,7 @@
 COMPOSE := docker compose
 
 .PHONY: help init install build up stop down restart status logs shell \
-	composer-install assets-install migrate seed db test quality stan \
+	composer-install assets-install migrate seed db test-db test quality stan \
 	cs-check cs-fix audit css css-watch
 
 help:
@@ -67,8 +67,11 @@ seed: up
 
 db: migrate seed
 
-test quality: up
-	$(COMPOSE) exec mysql prepare-test-database
+test-db: up
+	$(COMPOSE) cp docker/mysql/prepare-test-database.sh mysql:/tmp/prepare-test-database.sh
+	$(COMPOSE) exec mysql sh /tmp/prepare-test-database.sh
+
+test quality: test-db
 	$(COMPOSE) exec php composer $@
 
 stan: up
